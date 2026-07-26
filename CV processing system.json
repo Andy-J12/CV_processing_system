@@ -1,0 +1,907 @@
+{
+  "name": "CV processing system",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyX",
+              "value": 15,
+              "unit": "minutes"
+            }
+          ]
+        },
+        "filters": {
+          "labelIds": [
+            "Label_4185306769612915943"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -64,
+        -48
+      ],
+      "id": "5b16995c-2c7f-4f2d-87f0-7362a40c32ba",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HwyWQCCZJkANUfrT",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "messageId": "={{ $json.id }}",
+        "simple": false,
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        160,
+        -48
+      ],
+      "id": "9e09f97e-7866-41fe-bc71-57aa06d0dce7",
+      "name": "Get a message",
+      "webhookId": "b4a09867-5dae-46eb-9c77-454e3218cb52",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HwyWQCCZJkANUfrT",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "18dfb8c7-d759-42c6-b855-a03cac152734",
+              "leftValue": "={{ $binary.data.mimeType }}",
+              "rightValue": "application/pdf",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        496,
+        144
+      ],
+      "id": "b269a93b-d3f2-4c4b-a83f-cbe6cd854ed6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "path": "=/n8n_gmail/{{ $('Get a message').item.json.id }}_{{ $binary.data.fileName }}",
+        "binaryData": true
+      },
+      "type": "n8n-nodes-base.dropbox",
+      "typeVersion": 1,
+      "position": [
+        704,
+        304
+      ],
+      "id": "554a3672-b5c9-4fd4-a0d5-0238ab5791f7",
+      "name": "Upload a file",
+      "credentials": {
+        "dropboxOAuth2Api": {
+          "id": "535mZxj4OI3Nu3uY",
+          "name": "Dropbox account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "candidates",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "source_email_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.source_email_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        912
+      ],
+      "id": "54047a45-e298-4bc6-91d2-b603da349044",
+      "name": "Get many rows",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "oPEKjUpHa3xL0Fhc",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "92cfa280-4c84-46a1-8847-6a2ff572e6b7",
+              "leftValue": "={{ $json.es_cv }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        656
+      ],
+      "id": "4432132b-7cf6-4c0f-b24e-358c41819d0a",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "tableId": "candidates",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "full_name",
+              "fieldValue": "={{ $json.full_name }}"
+            },
+            {
+              "fieldId": "email",
+              "fieldValue": "={{ $json.email }}"
+            },
+            {
+              "fieldId": "phone",
+              "fieldValue": "={{ $json.phone }}"
+            },
+            {
+              "fieldId": "years_experience",
+              "fieldValue": "={{ $json.years_experience }}"
+            },
+            {
+              "fieldId": "skills",
+              "fieldValue": "={{ $json.skills }}"
+            },
+            {
+              "fieldId": "education",
+              "fieldValue": "={{ $json.education }}"
+            },
+            {
+              "fieldId": "experience",
+              "fieldValue": "={{ $json.experience }}"
+            },
+            {
+              "fieldId": "classification",
+              "fieldValue": "={{ $json.classification }}"
+            },
+            {
+              "fieldId": "classification_reason",
+              "fieldValue": "={{ $json.classification_reason }}"
+            },
+            {
+              "fieldId": "cv_file_url",
+              "fieldValue": "={{ $json.cv_file_url }}"
+            },
+            {
+              "fieldId": "source_email_id",
+              "fieldValue": "={{ $json.source_email_id }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "pending"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        704
+      ],
+      "id": "58541972-f3c6-4d95-9a0c-8e63ef8f1b39",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "oPEKjUpHa3xL0Fhc",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "andi1998jamil@gmail.com",
+        "subject": "=Nuevo candidato: {{ $json.full_name }} - {{ $json.classification }}",
+        "message": "=<p>Se ha procesado un nuevo CV.</p>  <p> <b>Nombre:</b> {{ $json.full_name }}<br> <b>Email:</b> {{ $json.email }}<br> <b>Teléfono:</b> {{ $json.phone }}<br> <b>Años de experiencia:</b> {{ $json.years_experience }}<br> <b>Clasificación:</b> {{ $json.classification }}<br> <b>Razón:</b> {{ $json.classification_reason }} </p>  <p><b>Habilidades:</b> {{ $json.skills.join(', ') }}</p>  <p><b>CV:</b> {{ $json.cv_file_url }}</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2560,
+        976
+      ],
+      "id": "c8cc2e80-3fbf-4db9-8f46-9a427a15c8d3",
+      "name": "Send a message",
+      "webhookId": "b0c16ca3-2c5c-4bde-a9de-d43e36d0a6de",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HwyWQCCZJkANUfrT",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        304
+      ],
+      "id": "cb0fddb6-804d-4582-8b33-d8fc056d4d9a",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const binaryKeys = Object.keys($input.item.binary || {});\nconst originalKey = binaryKeys[0];\n\nreturn {\n  json: $input.item.json,\n  binary: {\n    data: $input.item.binary[originalKey]\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        144,
+        304
+      ],
+      "id": "a1444a7a-8f49-42c8-8b45-f5d8ca12d08d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "content": "# Email screenshot",
+        "height": 272,
+        "width": 592
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        -112
+      ],
+      "id": "e6b04cff-02f2-4889-9d19-1a78bd57f1f6",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Validation and Support",
+        "height": 640,
+        "width": 468
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -112
+      ],
+      "id": "e4cda764-32a6-4181-b904-06c0e12694ec",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Preparation of Attachments",
+        "height": 352,
+        "width": 608
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        176
+      ],
+      "id": "3e72f2ae-5022-4d9b-84dd-9e83fe89a6f3",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Data Extraction Using AI",
+        "height": 624,
+        "width": 816
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        -112
+      ],
+      "id": "747d23ff-cf0f-455b-89c2-53c15475ab16",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "# Duplicate Check",
+        "height": 768,
+        "width": 816
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        992,
+        528
+      ],
+      "id": "a8919588-dd86-4dc9-8ee5-2adc7b30c478",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# AI-Based Classification",
+        "height": 848,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1856,
+        -48
+      ],
+      "id": "0efd106e-42d5-470c-9cad-9d5dff6301e7",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Retention and Notification",
+        "height": 928,
+        "width": 336
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        384
+      ],
+      "id": "262f7186-67be-47e6-9d66-33bea4919729",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rawText = $input.item.json.text;\n\nlet parsed;\ntry {\n  parsed = JSON.parse(rawText);\n} catch (e) {\n  const match = rawText.match(/\\{[\\s\\S]*\\}/);\n  if (match) {\n    parsed = JSON.parse(match[0]);\n  } else {\n    throw new Error('No se pudo extraer JSON válido: ' + rawText);\n  }\n}\n\nconst emailId = $('Get a message').item.json.id;\n\nreturn {\n  json: {\n    ...parsed,\n    source_email_id: emailId\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1488,
+        0
+      ],
+      "id": "454499ac-2f2e-48d0-9b97-6f4abf298757",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1440,
+        288
+      ],
+      "id": "17cdafa7-0af5-4fac-ae47-4e0f98d46a27",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "7d638fd9-f612-44a1-ae68-d256a2c1e62c",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1872,
+        560
+      ],
+      "id": "f42d449a-9630-4adc-9ddd-95dad00e28c6",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1568,
+        560
+      ],
+      "id": "e6648e17-82d5-4d76-88c1-0ee3c8381d39",
+      "name": "Merge1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const data = $input.item.json;\n\n// Renombra el id de Dropbox y elimina el original para evitar conflictos\nconst { id, ...rest } = data;\n\nreturn {\n  json: {\n    ...rest,\n    dropbox_file_id: id,\n    cv_file_url: data.path_display\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        288
+      ],
+      "id": "63f89805-e59d-4973-af71-0d5a91da4ce9",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Eres un asistente que extrae información estructurada de currículums (CVs).\n\nAnaliza el siguiente texto extraído de un PDF y determina:\n1. Si el documento es realmente un CV/currículum de una persona (no un documento de otro tipo, como un manual, curso, o factura)\n2. Si es un CV, extrae la información solicitada\n\nSi no se menciona directamente el total de años de experiencia, calcúlalo sumando la duración de cada experiencia laboral listada (convierte meses y semanas a fracciones de año, ej. 1 mes = 0.08, 2 semanas = 0.04). Nunca dejes years_experience como null si hay al menos una experiencia laboral listada.\n\nResponde ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, con esta estructura exacta:\n\n{\n  \"es_cv\": true o false,\n  \"full_name\": \"nombre completo o null si no aplica\",\n  \"email\": \"correo del candidato o null\",\n  \"phone\": \"teléfono o null\",\n  \"years_experience\": número decimal o null,\n  \"skills\": [\"array\", \"de\", \"habilidades\", \"técnicas\"],\n  \"education\": [{\"degree\": \"título\", \"institution\": \"institución\", \"year\": \"año\"}],\n  \"experience\": [{\"company\": \"empresa\", \"role\": \"cargo\", \"duration\": \"duración\"}]\n}\n\nSi el documento NO es un CV, responde solo:\n{\"es_cv\": false}"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1104,
+        0
+      ],
+      "id": "bcb2be89-945f-4148-8a81-4333fba101ab",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        176
+      ],
+      "id": "392ce3e0-83c7-4d80-b57d-c04bee82f100",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "34LEwrGaxKzvS9Yg",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        16
+      ],
+      "id": "c9e1b7a2-8e76-4ac6-98dd-8f420dc7b987",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1312,
+        896
+      ],
+      "id": "31109a53-a070-49f8-a93c-225f2b7edb35",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nombre: {{ $json.full_name }}\nAños de experiencia: {{ $json.years_experience }}\nHabilidades: {{ $json.skills }}\nExperiencia laboral: {{ JSON.stringify($json.experience) }}\nEducación: {{ JSON.stringify($json.education) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Eres un asistente de reclutamiento que clasifica candidatos según su nivel de experiencia.  Analiza los siguientes datos del candidato y clasifícalo en una de estas 3 categorías: - \"junior\": menos de 2 años de experiencia relevante, o principalmente estudiante/prácticas - \"semi-senior\": entre 2 y 5 años de experiencia relevante, con responsabilidades técnicas claras - \"senior\": más de 5 años de experiencia relevante, con roles de liderazgo o alta especialización  Considera tanto los años de experiencia como la relevancia y profundidad de las habilidades técnicas.  Responde ÚNICAMENTE con un JSON válido, sin texto adicional, sin markdown, con esta estructura exacta:  {   \"classification\": \"junior\" o \"semi-senior\" o \"senior\",   \"classification_reason\": \"explicación breve de 1-2 frases sobre por qué se clasificó así\" }"
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1952,
+        336
+      ],
+      "id": "dbf5f164-3416-4030-8418-759e553087fe",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": "deepseek-v4-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        576
+      ],
+      "id": "355d93ac-4f8c-421c-b185-daf52625cbec",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "34LEwrGaxKzvS9Yg",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rawText = $input.item.json.text;\n\nlet parsed;\ntry {\n  parsed = JSON.parse(rawText);\n} catch (e) {\n  const cleaned = rawText.replace(/```json|```/g, '').trim();\n  parsed = JSON.parse(cleaned);\n}\n\nreturn {\n  json: {\n    ...$('Merge1').item.json,\n    classification: parsed.classification,\n    classification_reason: parsed.classification_reason\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2192,
+        160
+      ],
+      "id": "59930ce7-f524-44d3-964b-7089359ec277",
+      "name": "Code in JavaScript3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a message": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Upload a file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Upload a file": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get many rows": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Get many rows",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "0b6dcca2-10fa-4ea2-8377-7c4c0302d047",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "45633d2e3996c331b8bf540a7565aa398c65933492441d6964649b62fa920812"
+  },
+  "nodeGroups": [],
+  "id": "IqhxSGlB1Zsi0TSG",
+  "tags": []
+}
