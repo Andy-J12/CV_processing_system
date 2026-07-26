@@ -127,6 +127,12 @@ The pipeline was tested with:
 - **Batch vs. per-item execution**: several bugs traced back to Code nodes running in "Run Once for All Items" mode when "Run Once for Each Item" was required — a subtle but important n8n setting.
 - **Provider migration mid-project**: started with Gemini, hit persistent free-tier rate limits, migrated the AI extraction and classification steps to DeepSeek without changing the rest of the pipeline — demonstrating the pipeline's LLM-provider independence.
 
+## Known limitations
+
+- **No OCR support**: the pipeline extracts text directly from PDFs. Non-PDF attachments (images, Word docs, etc.) are filtered out early via a MIME-type check and never reach the AI step. However, a genuine CV submitted as a **scanned/image-based PDF with no selectable text layer** will extract as empty text, and the LLM will correctly-but-unhelpfully classify it as `es_cv: false` — a false negative caused by missing OCR, not a real non-CV document. Adding OCR (e.g. Tesseract or a cloud OCR API) as a pre-processing step would resolve this.
+- **Polling delay**: the Gmail trigger checks for new emails on an interval (currently every 15 minutes), so notifications are not instantaneous — there can be up to that much delay between an email arriving and it being processed.
+- **Single email account**: the workflow is tied to one Gmail inbox and one Gmail label/filter; multi-recruiter or multi-inbox support would require additional routing logic.
+
 ## Disclaimer
 
 Test CVs used during development belong to real people who provided them for testing purposes. Do not use this repository's test data for any purpose other than understanding the workflow.
